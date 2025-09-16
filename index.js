@@ -20,6 +20,18 @@ app.post("/addTask", async (req, res) => {
 })
 
 
+app.get("/tasks", async (req, res) => {
+    const db = await connection();
+    const collection = db.collection(collectionName)
+    const result = await collection.find().toArray();
+    if (result) {
+        res.send({ message: "Task List", success: true, result })
+    } else {
+        res.send({ message: "Something Wrong", success: false, result })
+    }
+})
+
+
 /**
  * Get Api For Testing
  */
