@@ -33,6 +33,52 @@ app.get("/tasks", async (req, res) => {
 })
 
 
+
+app.get("/tasks/:id", async (req, res) => {
+    const db = await connection();
+    const collection = db.collection(collectionName)
+    let id = req.params.id;
+    const result = await collection.findOne({_id:new ObjectId(id)});
+    if (result) {
+        res.send({ message: "Update List", success: true, result })
+    } else {
+        res.send({ message: "Something Wrong", success: false, result })
+    }
+})
+
+app.post("/updateTask/:id", async (req, res) => {
+    try {
+        const db = await connection();
+        const collection = db.collection(collectionName);
+
+        const taskId = req.params.id;
+
+        // Validate ObjectId
+        if (!ObjectId.isValid(taskId)) {
+            return res.status(400).send({ 
+                message: "Invalid task ID format", 
+                success: false 
+            });
+        }
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(taskId) },  // filter
+            { $set: req.body }              // update data
+        );
+
+        if (result.modifiedCount > 0) {
+            res.send({ message: "Task Updated Successfully", success: true, result });
+        } else {
+            res.send({ message: "No task found or nothing to update", success: false, result });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Something went wrong", success: false, error });
+    }
+});
+
+
+
 app.delete("/delete/:id", async (req, res) => {
     const db = await connection();
     const collection = db.collection(collectionName)
